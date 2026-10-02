@@ -79,7 +79,8 @@ def admin():
     
     events = Event.query.all()
     links = Link.query.all()
-    return render_template('admin.html', events=events, links=links)
+    messages = ContactMessage.query.order_by(ContactMessage.date.desc()).all()
+    return render_template('admin.html', events=events, links=links, messages=messages)
 
 @app.route('/admin/add_event', methods=['POST'])
 def add_event():
@@ -176,6 +177,17 @@ def delete_link(id):
     db.session.delete(link)
     db.session.commit()
     flash('Bağlantı silindi!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/delete_message/<int:id>', methods=['POST'])
+def delete_message(id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
+    msg = ContactMessage.query.get_or_404(id)
+    db.session.delete(msg)
+    db.session.commit()
+    flash('Mesaj silindi!', 'success')
     return redirect(url_for('admin'))
 
 @app.route('/contact', methods=['POST'])
