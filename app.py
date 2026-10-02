@@ -57,37 +57,8 @@ def index():
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
     if request.method == 'POST':
-        # Etkinlik Ekleme Formu Kontrolü
-        if 'add_event' in request.form:
-            title = request.form.get('title')
-            description = request.form.get('description')
-            date = request.form.get('date')
-            location = request.form.get('location')
-            rsvp_link = request.form.get('rsvp_link')
-            
-            image_filename = None
-            if 'image' in request.files:
-                file = request.files['image']
-                if file and file.filename != '':
-                    filename = secure_filename(file.filename)
-                    os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
-                    file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                    image_filename = filename
-
-            new_event = Event(
-                title=title,
-                description=description,
-                date=date,
-                location=location,
-                rsvp_link=rsvp_link,
-                image_filename=image_filename
-            )
-            db.session.add(new_event)
-            db.session.commit()
-            flash('Etkinlik başarıyla eklendi!', 'success')
-
         # Sosyal Medya / Hızlı Bağlantı Ekleme
-        elif 'add_link' in request.form:
+        if 'add_link' in request.form:
             title = request.form.get('link_title')
             url = request.form.get('link_url')
             icon = request.form.get('link_icon')
@@ -102,6 +73,36 @@ def admin():
     events = Event.query.all()
     links = Link.query.all()
     return render_template('admin.html', events=events, links=links)
+
+@app.route('/admin/add_event', methods=['POST'])
+def add_event():
+    title = request.form.get('title')
+    description = request.form.get('description')
+    date = request.form.get('date')
+    location = request.form.get('location')
+    rsvp_link = request.form.get('rsvp_link')
+    
+    image_filename = None
+    if 'image' in request.files:
+        file = request.files['image']
+        if file and file.filename != '':
+            filename = secure_filename(file.filename)
+            os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            image_filename = filename
+
+    new_event = Event(
+        title=title,
+        description=description,
+        date=date,
+        location=location,
+        rsvp_link=rsvp_link,
+        image_filename=image_filename
+    )
+    db.session.add(new_event)
+    db.session.commit()
+    flash('Etkinlik başarıyla eklendi!', 'success')
+    return redirect(url_for('admin'))
 
 if __name__ == '__main__':
     app.run(debug=True)
