@@ -90,6 +90,38 @@ def add_event():
     flash('Etkinlik başarıyla eklendi!', 'success')
     return redirect(url_for('admin'))
 
+@app.route('/admin/edit_event/<int:id>', methods=['GET', 'POST'])
+def edit_event(id):
+    event = Event.query.get_or_404(id)
+    if request.method == 'POST':
+        event.title = request.form.get('title')
+        event.description = request.form.get('description')
+        event.date = request.form.get('date')
+        event.location = request.form.get('location')
+        event.rsvp_link = request.form.get('rsvp_link')
+        
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename != '':
+                filename = secure_filename(file.filename)
+                os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                event.image_filename = filename
+
+        db.session.commit()
+        flash('Etkinlik başarıyla güncellendi!', 'success')
+        return redirect(url_for('admin'))
+    
+    return render_template('edit_event.html', event=event)
+
+@app.route('/admin/delete_event/<int:id>', methods=['POST'])
+def delete_event(id):
+    event = Event.query.get_or_404(id)
+    db.session.delete(event)
+    db.session.commit()
+    flash('Etkinlik silindi!', 'success')
+    return redirect(url_for('admin'))
+
 @app.route('/admin/add_link', methods=['POST'])
 def add_link():
     title = request.form.get('link_title') or request.form.get('title')
@@ -100,6 +132,14 @@ def add_link():
     db.session.add(new_link)
     db.session.commit()
     flash('Bağlantı başarıyla eklendi!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/admin/delete_link/<int:id>', methods=['POST'])
+def delete_link(id):
+    link = Link.query.get_or_404(id)
+    db.session.delete(link)
+    db.session.commit()
+    flash('Bağlantı silindi!', 'success')
     return redirect(url_for('admin'))
 
 @app.route('/contact', methods=['POST'])
