@@ -56,20 +56,6 @@ def index():
 
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
-    if request.method == 'POST':
-        # Sosyal Medya / Hızlı Bağlantı Ekleme
-        if 'add_link' in request.form:
-            title = request.form.get('link_title')
-            url = request.form.get('link_url')
-            icon = request.form.get('link_icon')
-            
-            new_link = Link(title=title, url=url, icon=icon)
-            db.session.add(new_link)
-            db.session.commit()
-            flash('Bağlantı başarıyla eklendi!', 'success')
-
-        return redirect(url_for('admin'))
-
     events = Event.query.all()
     links = Link.query.all()
     return render_template('admin.html', events=events, links=links)
@@ -103,6 +89,30 @@ def add_event():
     db.session.commit()
     flash('Etkinlik başarıyla eklendi!', 'success')
     return redirect(url_for('admin'))
+
+@app.route('/admin/add_link', methods=['POST'])
+def add_link():
+    title = request.form.get('link_title') or request.form.get('title')
+    url = request.form.get('link_url') or request.form.get('url')
+    icon = request.form.get('link_icon') or request.form.get('icon')
+    
+    new_link = Link(title=title, url=url, icon=icon)
+    db.session.add(new_link)
+    db.session.commit()
+    flash('Bağlantı başarıyla eklendi!', 'success')
+    return redirect(url_for('admin'))
+
+@app.route('/contact', methods=['POST'])
+def contact():
+    name = request.form.get('name')
+    email = request.form.get('email')
+    message = request.form.get('message')
+    
+    new_msg = ContactMessage(name=name, email=email, message=message)
+    db.session.add(new_msg)
+    db.session.commit()
+    flash('Mesajınız başarıyla gönderildi!', 'success')
+    return redirect(url_for('index'))
 
 if __name__ == '__main__':
     app.run(debug=True)
