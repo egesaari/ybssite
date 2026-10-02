@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="tr" class="scroll-smooth dark" id="htmlRoot">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>İstanbul Beykent Üniversitesi - YBS Kulübü</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>body { font-family: 'Plus Jakarta Sans', sans-serif; }</style>
+</head>
+<body class="bg-[#090d16] dark:bg-[#090d16] text-slate-100 dark:text-slate-100 min-h-screen flex flex-col justify-between selection:bg-yellow-500 selection:text-black transition-colors duration-300" id="pageBody">
+
+    <!-- Arka Plan Işık Efektleri -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+        <div class="absolute -top-40 -left-40 w-96 h-96 bg-yellow-500/10 rounded-full blur-3xl"></div>
+        <div class="absolute top-1/2 -right-40 w-96 h-96 bg-blue-600/10 rounded-full blur-3xl"></div>
+    </div>
+
+    <main class="relative z-10 max-w-4xl mx-auto px-4 py-8 w-full space-y-8">
+        
+        <!-- Üst Bar: Tema Değiştirme Butonu -->
+        <div class="flex justify-end">
+            <button onclick="toggleTheme()" class="group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/80 dark:bg-slate-900/80 text-slate-300 border border-slate-800 hover:text-white hover:border-yellow-500/50 transition-all shadow-lg text-xs font-semibold" id="themeBtn">
+                <i id="themeIcon" class="fa-solid fa-sun text-yellow-400 group-hover:rotate-95 transition-transform"></i>
+                <span id="themeText">Aydınlık Mod</span>
+            </button>
+        </div>
+
+        <!-- Flash Mesajları -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-sm text-center font-medium shadow-lg">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- Kulüp Logo ve Başlık -->
+        <div class="text-center space-y-4 max-w-xl mx-auto">
+            <div class="relative w-36 h-36 mx-auto group">
+                <div class="absolute -inset-1 bg-gradient-to-r from-yellow-500 to-blue-600 rounded-full blur-md opacity-80 group-hover:opacity-100 transition duration-500"></div>
+                <div class="relative w-36 h-36 bg-slate-900 rounded-full p-2 flex items-center justify-center overflow-hidden shadow-2xl border border-slate-700/50">
+                    <img src="{{ url_for('static', filename='logo.jpg') }}" alt="YBS Logo" class="w-full h-full object-cover rounded-full" style="object-position: 48% 50%; transform: scale(1.08);">
+                </div>
+            </div>
+            
+            <div class="space-y-1.5">
+                <!-- Aydınlık modda text-slate-900, koyu modda text-white -->
+                <h1 class="text-2xl font-extrabold tracking-tight text-slate-900 dark:text-white sm:text-3xl transition-colors">Beykent Üniversitesi YBS Kulübü</h1>
+                <p class="text-slate-600 dark:text-slate-400 text-sm max-w-md mx-auto leading-relaxed transition-colors">
+                    Yönetim Bilişim Sistemleri Kulübü • Teknoloji, inovasyon ve iş dünyasının buluşma noktası 🚀
+                </p>
+            </div>
+        </div>
+
+        <!-- 🗂️ 3'lü Şık Sekme (Tab) Butonları -->
+        <div class="flex flex-wrap justify-center items-center gap-2.5">
+            <button onclick="switchTab('home')" id="btn-home" class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all bg-yellow-500 text-black shadow-lg shadow-yellow-500/10 flex items-center gap-2">
+                <i class="fa-solid fa-house"></i> Ana Sayfa
+            </button>
+            <button onclick="switchTab('events')" id="btn-events" class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all bg-slate-900/80 dark:bg-slate-900/80 text-slate-300 border border-slate-800 hover:text-white hover:border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> Etkinlikler
+            </button>
+            <button onclick="switchTab('contact')" id="btn-contact" class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all bg-slate-900/80 dark:bg-slate-900/80 text-slate-300 border border-slate-800 hover:text-white hover:border-slate-700 flex items-center gap-2">
+                <i class="fa-solid fa-paper-plane"></i> Bize Ulaşın
+            </button>
+        </div>
+
+        <!-- 🏠 1. SEKME: ANA SAYFA (Hızlı Linkler / Sosyal Medya) -->
+        <div id="tab-home" class="space-y-6 max-w-xl mx-auto">
+            <div class="space-y-3.5">
+                <h2 class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-yellow-500 mb-4 flex items-center gap-2">
+                    <i class="fa-solid fa-compass"></i> Hızlı Bağlantılar & Sosyal Medya
+                </h2>
+
+                {% if links %}
+                    {% for link in links %}
+                    <a href="{{ link.url }}" target="_blank" 
+                       class="group relative flex items-center justify-between p-4 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-yellow-500/50 hover:shadow-xl transition-all duration-300 shadow-md">
+                        <div class="flex items-center space-x-3.5">
+                            <div class="w-11 h-11 rounded-xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700/50 flex items-center justify-center text-amber-600 dark:text-yellow-400 group-hover:scale-110 transition-all shadow-inner">
+                                <i class="{{ link.icon }} text-lg"></i>
+                            </div>
+                            <span class="font-semibold text-slate-800 dark:text-slate-200 group-hover:text-black dark:group-hover:text-white transition-colors text-sm sm:text-base">{{ link.title }}</span>
+                        </div>
+                        <div class="w-8 h-8 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 dark:text-slate-400 group-hover:bg-yellow-500 group-hover:text-black transition-all">
+                            <i class="fa-solid fa-arrow-right text-xs"></i>
+                        </div>
+                    </a>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-8 bg-slate-100 dark:bg-slate-900/40 rounded-2xl border border-slate-200 dark:border-slate-800/60 p-6">
+                        <p class="text-slate-500 dark:text-slate-400 text-sm">Henüz bir bağlantı eklenmedi.</p>
+                        <p class="text-slate-400 dark:text-slate-500 text-xs mt-1">Yönetici panelinden ekleyebilirsiniz.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- ⚡ 2. SEKME: ETKİNLİKLER -->
+        <div id="tab-events" class="hidden space-y-4 max-w-2xl mx-auto">
+            <h2 class="text-xs font-bold uppercase tracking-widest text-amber-600 dark:text-yellow-500 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-bolt"></i> Güncel Etkinlikler & Duyurular
+            </h2>
+
+            {% if events %}
+                <div class="space-y-6">
+                    {% for event in events %}
+                    <div class="p-6 rounded-2xl bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-all space-y-4 shadow-xl backdrop-blur-sm overflow-hidden">
+                        
+                        <!-- Etkinlik Görseli -->
+                        {% if event.image_filename %}
+                        <div class="w-full rounded-xl overflow-hidden border border-slate-200 dark:border-slate-800 bg-slate-950 flex items-center justify-center p-2.5 shadow-inner cursor-pointer group relative" onclick="openModal('{{ url_for('static', filename='uploads/' + event.image_filename) }}')">
+                            <img src="{{ url_for('static', filename='uploads/' + event.image_filename) }}" alt="Etkinlik Görseli" class="max-h-[280px] w-auto max-w-full object-contain rounded-lg shadow-md group-hover:scale-[1.02] transition-transform duration-300">
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center rounded-xl">
+                                <span class="bg-yellow-500 text-black text-xs font-bold px-3 py-1.5 rounded-full shadow-lg flex items-center gap-1.5">
+                                    <i class="fa-solid fa-expand"></i> Büyüt / İncele
+                                </span>
+                            </div>
+                        </div>
+                        {% endif %}
+
+                        <div class="flex justify-between items-start gap-3">
+                            <h3 class="font-bold text-slate-900 dark:text-white text-base sm:text-lg leading-snug">{{ event.title }}</h3>
+                            <span class="text-xs px-3 py-1 rounded-full bg-yellow-500/10 text-amber-600 dark:text-yellow-400 border border-yellow-500/20 font-semibold shrink-0">
+                                {{ event.date }}
+                            </span>
+                        </div>
+                        <p class="text-slate-600 dark:text-slate-400 text-sm leading-relaxed">{{ event.description }}</p>
+                        <div class="flex items-center justify-between pt-3 border-t border-slate-200 dark:border-slate-800 text-xs text-slate-500 dark:text-slate-400">
+                            <span class="flex items-center gap-1.5"><i class="fa-solid fa-location-dot text-amber-600 dark:text-yellow-500"></i> {{ event.location }}</span>
+                            {% if event.rsvp_link %}
+                            <a href="{{ event.rsvp_link }}" target="_blank" class="inline-flex items-center gap-1 px-3.5 py-1.5 rounded-xl bg-yellow-500 text-black font-bold hover:bg-yellow-400 transition-colors">
+                                Kayıt Ol <i class="fa-solid fa-arrow-right text-[10px]"></i>
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="text-center py-12 bg-slate-100 dark:bg-slate-900/30 rounded-2xl border border-slate-200 dark:border-slate-800/60">
+                    <p class="text-slate-500 dark:text-slate-400 text-sm">Şu an planlanmış aktif bir etkinlik bulunmuyor.</p>
+                </div>
+            {% endif %}
+        </div>
+
+        <!-- ✉️ 3. SEKME: BİZE ULAŞIN FORMU -->
+        <div id="tab-contact" class="hidden max-w-xl mx-auto">
+            <div class="bg-white dark:bg-slate-900/90 border border-slate-200 dark:border-slate-800 p-8 rounded-3xl shadow-2xl backdrop-blur space-y-6">
+                <div class="text-center space-y-2">
+                    <h2 class="text-xl font-extrabold text-slate-900 dark:text-white flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-paper-plane text-amber-600 dark:text-yellow-500"></i> Bize Ulaşın
+                    </h2>
+                    <p class="text-slate-600 dark:text-slate-400 text-xs">Sorularınız, önerileriniz veya iş birliği teklifleriniz için bize yazın.</p>
+                </div>
+
+                <form action="/contact" method="POST" class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Adınız Soyadınız</label>
+                        <input type="text" name="name" required placeholder="Örn: Ahmet Yılmaz"
+                               class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:outline-none focus:border-yellow-500 text-slate-900 dark:text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">E-Posta Adresiniz</label>
+                        <input type="email" name="email" required placeholder="ornek@beykent.edu.tr"
+                               class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:outline-none focus:border-yellow-500 text-slate-900 dark:text-white text-sm">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-600 dark:text-slate-400 mb-1.5">Mesajınız</label>
+                        <textarea name="message" rows="4" required placeholder="Mesajınızı buraya yazın..."
+                                  class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-950 border border-slate-300 dark:border-slate-800 rounded-xl focus:outline-none focus:border-yellow-500 text-slate-900 dark:text-white text-sm"></textarea>
+                    </div>
+                    <button type="submit" class="w-full py-3.5 bg-yellow-500 hover:bg-yellow-400 transition-colors font-bold rounded-xl text-black shadow-lg shadow-yellow-500/10 text-sm">
+                        Mesajı Gönder
+                    </button>
+                </form>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Fotoğrafı Büyütme Modalı (Lightbox) -->
+    <div id="imageModal" class="fixed inset-0 z-50 hidden bg-black/90 backdrop-blur-md flex items-center justify-center p-4 cursor-pointer" onclick="closeModal()">
+        <div class="relative max-w-4xl max-h-[90vh] p-2" onclick="event.stopPropagation()">
+            <button onclick="closeModal()" class="absolute -top-10 right-0 text-white bg-slate-800 hover:bg-red-600 w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold transition-colors shadow-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+            <img id="modalImage" src="" alt="Büyük Afiş" class="max-h-[85vh] w-auto max-w-full rounded-2xl shadow-2xl border border-slate-700 object-contain">
+        </div>
+    </div>
+
+    <!-- JavaScript: Tema ve Sekme Kontrolleri -->
+    <script>
+        function toggleTheme() {
+            const htmlRoot = document.getElementById('htmlRoot');
+            const body = document.getElementById('pageBody');
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            const themeBtn = document.getElementById('themeBtn');
+            
+            if (htmlRoot.classList.contains('dark')) {
+                // Aydınlık Moda Geç
+                htmlRoot.classList.remove('dark');
+                body.style.backgroundColor = '#f8fafc';
+                body.style.color = '#0f172a';
+                themeBtn.className = "group flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:text-black hover:border-amber-500/50 transition-all shadow-md text-xs font-semibold";
+                themeIcon.className = "fa-solid fa-moon text-slate-700 group-hover:-rotate-12 transition-transform";
+                themeText.innerText = "Koyu Mod";
+                localStorage.setItem('theme', 'light');
+            } else {
+                // Koyu Moda Geç
+                htmlRoot.classList.add('dark');
+                body.style.backgroundColor = '#090d16';
+                body.style.color = '#f1f5f9';
+                themeBtn.className = "group flex items-center gap-2 px-4 py-2 rounded-xl bg-slate-900/80 text-slate-300 border border-slate-800 hover:text-white hover:border-yellow-500/50 transition-all shadow-lg text-xs font-semibold";
+                themeIcon.className = "fa-solid fa-sun text-yellow-400 group-hover:rotate-95 transition-transform";
+                themeText.innerText = "Aydınlık Mod";
+                localStorage.setItem('theme', 'dark');
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme');
+            const htmlRoot = document.getElementById('htmlRoot');
+            if (savedTheme === 'light') {
+                htmlRoot.classList.remove('dark');
+                document.getElementById('pageBody').style.backgroundColor = '#f8fafc';
+                document.getElementById('pageBody').style.color = '#0f172a';
+                document.getElementById('themeBtn').className = "group flex items-center gap-2 px-4 py-2 rounded-xl bg-white text-slate-700 border border-slate-300 hover:text-black hover:border-amber-500/50 transition-all shadow-md text-xs font-semibold";
+                document.getElementById('themeIcon').className = "fa-solid fa-moon text-slate-700 group-hover:-rotate-12 transition-transform";
+                document.getElementById('themeText').innerText = "Koyu Mod";
+            }
+        });
+
+        function switchTab(tabName) {
+            const homeTab = document.getElementById('tab-home');
+            const eventsTab = document.getElementById('tab-events');
+            const contactTab = document.getElementById('tab-contact');
+            
+            const btnHome = document.getElementById('btn-home');
+            const btnEvents = document.getElementById('btn-events');
+            const btnContact = document.getElementById('btn-contact');
+
+            homeTab.classList.add('hidden');
+            eventsTab.classList.add('hidden');
+            contactTab.classList.add('hidden');
+
+            const inactiveClass = "px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all bg-slate-900/80 dark:bg-slate-900/80 text-slate-300 border border-slate-800 hover:text-white hover:border-slate-700 flex items-center gap-2";
+            const activeClass = "px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all bg-yellow-500 text-black shadow-lg shadow-yellow-500/10 flex items-center gap-2";
+
+            btnHome.className = inactiveClass;
+            btnEvents.className = inactiveClass;
+            btnContact.className = inactiveClass;
+
+            if (tabName === 'home') {
+                homeTab.classList.remove('hidden');
+                btnHome.className = activeClass;
+            } else if (tabName === 'events') {
+                eventsTab.classList.remove('hidden');
+                btnEvents.className = activeClass;
+            } else if (tabName === 'contact') {
+                contactTab.classList.remove('hidden');
+                btnContact.className = activeClass;
+            }
+        }
+
+        function openModal(imageSrc) {
+            const modal = document.getElementById('imageModal');
+            const modalImg = document.getElementById('modalImage');
+            modalImg.src = imageSrc;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('imageModal');
+            modal.classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        document.addEventListener('keydown', function(event) {
+            if (event.key === "Escape") {
+                closeModal();
+            }
+        });
+    </script>
+
+    <!-- Alt Bilgi -->
+    <footer class="relative z-10 text-center py-8 text-xs text-slate-500 border-t border-slate-200 dark:border-slate-800/80 bg-slate-100/50 dark:bg-slate-950/50 backdrop-blur mt-12">
+        <p>&copy; 2026 İstanbul Beykent Üniversitesi - YBS Kulübü</p>
+        <p class="mt-2"><a href="/admin" class="text-amber-600 dark:text-yellow-500/80 hover:text-amber-700 dark:hover:text-yellow-400 font-semibold transition-colors">Yönetici Paneli Girişi</a></p>
+    </footer>
+
+</body>
+</html>
