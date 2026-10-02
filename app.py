@@ -1,5 +1,5 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash
+from flask import Flask, render_template, request, redirect, url_for, flash, session
 from flask_sqlalchemy import SQLAlchemy
 from werkzeug.utils import secure_filename
 
@@ -54,14 +54,37 @@ def index():
     links = Link.query.all()
     return render_template('index.html', events=events, links=links)
 
+@app.route('/admin-login', methods=['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        password = request.form.get('password')
+        if password == '160422':
+            session['admin_logged_in'] = True
+            return redirect(url_for('admin'))
+        else:
+            flash('Hatalı şifre!', 'danger')
+    return render_template('admin_login.html')
+
+@app.route('/admin-logout')
+def admin_logout():
+    session.pop('admin_logged_in', None)
+    flash('Çıkış yapıldı.', 'info')
+    return redirect(url_for('admin_login'))
+
 @app.route('/admin', methods=['GET', 'POST'])
 def admin():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+    
     events = Event.query.all()
     links = Link.query.all()
     return render_template('admin.html', events=events, links=links)
 
 @app.route('/admin/add_event', methods=['POST'])
 def add_event():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
     title = request.form.get('title')
     description = request.form.get('description')
     date = request.form.get('date')
@@ -92,6 +115,9 @@ def add_event():
 
 @app.route('/admin/edit_event/<int:id>', methods=['GET', 'POST'])
 def edit_event(id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
     event = Event.query.get_or_404(id)
     if request.method == 'POST':
         event.title = request.form.get('title')
@@ -116,6 +142,9 @@ def edit_event(id):
 
 @app.route('/admin/delete_event/<int:id>', methods=['POST'])
 def delete_event(id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
     event = Event.query.get_or_404(id)
     db.session.delete(event)
     db.session.commit()
@@ -124,6 +153,9 @@ def delete_event(id):
 
 @app.route('/admin/add_link', methods=['POST'])
 def add_link():
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
     title = request.form.get('link_title') or request.form.get('title')
     url = request.form.get('link_url') or request.form.get('url')
     icon = request.form.get('link_icon') or request.form.get('icon')
@@ -136,6 +168,9 @@ def add_link():
 
 @app.route('/admin/delete_link/<int:id>', methods=['POST'])
 def delete_link(id):
+    if not session.get('admin_logged_in'):
+        return redirect(url_for('admin_login'))
+
     link = Link.query.get_or_404(id)
     db.session.delete(link)
     db.session.commit()
